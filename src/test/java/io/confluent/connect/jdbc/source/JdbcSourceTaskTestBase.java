@@ -36,12 +36,12 @@ public class JdbcSourceTaskTestBase {
   protected static String SINGLE_TABLE_NAME = "test";
   protected static TableId SINGLE_TABLE_ID = new TableId(null, null, SINGLE_TABLE_NAME);
   protected static Map<String, String> SINGLE_TABLE_PARTITION =
-      OffsetProtocols.sourcePartitionForProtocolV0(SINGLE_TABLE_ID);
+          OffsetProtocols.sourcePartitionForProtocolV0(SINGLE_TABLE_ID);
   protected static Map<String, String> SINGLE_TABLE_PARTITION_WITH_VERSION =
-      OffsetProtocols.sourcePartitionForProtocolV1(SINGLE_TABLE_ID);
+          OffsetProtocols.sourcePartitionForProtocolV1(SINGLE_TABLE_ID);
 
   protected static EmbeddedDerby.TableName SINGLE_TABLE
-      = new EmbeddedDerby.TableName(SINGLE_TABLE_NAME);
+          = new EmbeddedDerby.TableName(SINGLE_TABLE_NAME);
 
   protected static String SECOND_TABLE_NAME = "test2";
   protected static Map<String, Object> SECOND_TABLE_PARTITION = new HashMap<>();
@@ -51,17 +51,17 @@ public class JdbcSourceTaskTestBase {
   }
 
   protected static EmbeddedDerby.TableName SECOND_TABLE
-      = new EmbeddedDerby.TableName(SECOND_TABLE_NAME);
+          = new EmbeddedDerby.TableName(SECOND_TABLE_NAME);
 
   protected static String JOIN_TABLE_NAME = "users";
   protected static Map<String, Object> JOIN_QUERY_PARTITION = new HashMap<>();
 
   static {
     JOIN_QUERY_PARTITION.put(JdbcSourceConnectorConstants.QUERY_NAME_KEY,
-                             JdbcSourceConnectorConstants.QUERY_NAME_VALUE);
+            JdbcSourceConnectorConstants.QUERY_NAME_VALUE);
   }
   protected static EmbeddedDerby.TableName JOIN_TABLE
-      = new EmbeddedDerby.TableName(JOIN_TABLE_NAME);
+          = new EmbeddedDerby.TableName(JOIN_TABLE_NAME);
 
   protected static final String TOPIC_PREFIX = "test-";
 
@@ -104,9 +104,19 @@ public class JdbcSourceTaskTestBase {
     return props;
   }
 
+  protected Map<String, String> singleTableMultiIncrementsConfig(boolean repeatingIncrements) {
+    Map<String, String> props = new HashMap<>();
+    props.put(JdbcSourceConnectorConfig.CONNECTION_URL_CONFIG, db.getUrl());
+    props.put(JdbcSourceTaskConfig.TABLES_CONFIG, SINGLE_TABLE_NAME);
+    props.put(JdbcSourceTaskConfig.TOPIC_PREFIX_CONFIG, TOPIC_PREFIX);
+    props.put(JdbcSourceConnectorConfig.MODE_CONFIG, JdbcSourceConnectorConfig.MODE_INCREMENTING);
+    props.put(JdbcSourceConnectorConfig.INCREMENTING_CHANGE_TRACKING_CONFIG, "true");
+    return props;
+  }
+
   protected Map<String, String> singleTableWithTimezoneConfig(
-      boolean completeMapping,
-      TimeZone tz) {
+          boolean completeMapping,
+          TimeZone tz) {
     Map<String, String> props = singleTableConfig(completeMapping);
     props.put(JdbcSourceTaskConfig.DB_TIMEZONE_CONFIG, tz.getID());
     return props;

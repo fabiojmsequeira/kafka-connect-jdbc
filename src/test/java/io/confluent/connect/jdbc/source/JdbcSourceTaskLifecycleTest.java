@@ -83,8 +83,8 @@ public class JdbcSourceTaskLifecycleTest extends JdbcSourceTaskTestBase {
     task = new JdbcSourceTask(time) {
       @Override
       protected CachedConnectionProvider connectionProvider(
-          int maxConnAttempts,
-          long retryBackoff
+              int maxConnAttempts,
+              long retryBackoff
       ) {
         return mockCachedConnectionProvider;
       }
@@ -121,7 +121,7 @@ public class JdbcSourceTaskLifecycleTest extends JdbcSourceTaskTestBase {
     try {
       task.stop();
       synchronized (lock) {
-          lock.wait();
+        lock.wait();
       }
       running.set(false);
     } finally {
@@ -137,8 +137,8 @@ public class JdbcSourceTaskLifecycleTest extends JdbcSourceTaskTestBase {
     task = new JdbcSourceTask(time) {
       @Override
       protected CachedConnectionProvider connectionProvider(
-          int maxConnAttempts,
-          long retryBackoff
+              int maxConnAttempts,
+              long retryBackoff
       ) {
         return mockCachedConnectionProvider;
       }
@@ -177,10 +177,10 @@ public class JdbcSourceTaskLifecycleTest extends JdbcSourceTaskTestBase {
     // Subsequent polls have to wait for timeout
     task.poll();
     assertEquals(startTime + JdbcSourceConnectorConfig.POLL_INTERVAL_MS_DEFAULT,
-                 time.milliseconds());
+            time.milliseconds());
     task.poll();
     assertEquals(startTime + 2 * JdbcSourceConnectorConfig.POLL_INTERVAL_MS_DEFAULT,
-                 time.milliseconds());
+            time.milliseconds());
 
     task.stop();
   }
@@ -211,7 +211,7 @@ public class JdbcSourceTaskLifecycleTest extends JdbcSourceTaskTestBase {
     // Subsequent poll should wait for next timeout
     task.poll();
     assertEquals(startTime + JdbcSourceConnectorConfig.POLL_INTERVAL_MS_DEFAULT,
-                 time.milliseconds());
+            time.milliseconds());
 
   }
 
@@ -239,11 +239,11 @@ public class JdbcSourceTaskLifecycleTest extends JdbcSourceTaskTestBase {
     // Subsequent poll should wait for next timeout
     records = task.poll();
     assertEquals(startTime + JdbcSourceConnectorConfig.POLL_INTERVAL_MS_DEFAULT,
-                 time.milliseconds());
+            time.milliseconds());
     validatePollResultTable(records, 1, SINGLE_TABLE_NAME);
     records = task.poll();
     assertEquals(startTime + JdbcSourceConnectorConfig.POLL_INTERVAL_MS_DEFAULT,
-                 time.milliseconds());
+            time.milliseconds());
     validatePollResultTable(records, 1, SECOND_TABLE_NAME);
 
   }
@@ -282,13 +282,13 @@ public class JdbcSourceTaskLifecycleTest extends JdbcSourceTaskTestBase {
     for(int i = 0; i < 2; i++) {
       List<SourceRecord> records = task.poll();
       assertEquals(startTime + JdbcSourceConnectorConfig.POLL_INTERVAL_MS_DEFAULT,
-                   time.milliseconds());
+              time.milliseconds());
       validatePollResultTable(records, 1, SINGLE_TABLE_NAME);
     }
     for(int i = 0; i < 2; i++) {
       List<SourceRecord> records = task.poll();
       assertEquals(startTime + JdbcSourceConnectorConfig.POLL_INTERVAL_MS_DEFAULT,
-                   time.milliseconds());
+              time.milliseconds());
       validatePollResultTable(records, 1, SECOND_TABLE_NAME);
     }
   }
@@ -316,6 +316,36 @@ public class JdbcSourceTaskLifecycleTest extends JdbcSourceTaskTestBase {
     });
     assertThat(e.getCause(), instanceOf(SQLNonTransientException.class));
     assertThat(e.getMessage(), containsString("not_existing_table"));
+  }
+
+  //  @Test :TODO
+  public void testRepeatingIncrementsEmptyPoll() throws Exception {
+    //    db.createTable(SINGLE_TABLE_NAME, "id", "INT");
+    //    db.createTable(SECOND_TABLE_NAME, "id", "INT");
+    //    task.start(twoTableConfig());
+
+    //    assertNull(task.poll());
+    // Here we just want to verify behavior of the poll method, not any loading of data, so we
+    // specifically want an empty
+    db.createTable(SINGLE_TABLE_NAME, "id", "INT");
+    // Need data or poll() never returns
+    //    db.insert(SINGLE_TABLE_NAME, "id", 1);
+
+    //    long startTime = time.milliseconds();
+
+    task.start(singleTableMultiIncrementsConfig(true));
+
+    // First poll should happen immediately
+    //    task.poll();
+    //    assertEquals(startTime, time.milliseconds());
+
+    // Subsequent polls have to wait for timeout
+    System.out.println("||| WE ARE POLLING HERE GUYS");
+    task.poll();
+    //    assertEquals(startTime + JdbcSourceConnectorConfig.POLL_INTERVAL_MS_DEFAULT,
+    //            time.milliseconds());
+
+    task.stop();
   }
 
   @Test(expected = ConnectException.class)
